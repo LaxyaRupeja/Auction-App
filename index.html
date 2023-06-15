@@ -46,7 +46,9 @@
     <div id="messages"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io();
+      var socket = io("https://auction-app-nine.vercel.app:3000", {
+        transports: ["websocket"],
+      });
 
       var form = document.getElementById("form");
       var input = document.getElementById("input");
