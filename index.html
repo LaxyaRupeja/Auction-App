@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding-bottom: 3rem;
+        width: 100vw;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      #messages {
+        /* width: 90%; */
+        border: 1px solid red;
+        display: grid;
+        place-items: center;
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: 1fr;
+        margin: auto;
+        padding: 10px;
+        gap: 30px;
+      }
+      .blog {
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        padding: 20px;
+        font-size: 18px;
+      }
+      form {
+        display: flex;
+      }
+      form > input,
+      form > button {
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Itaque omnis illo
+    dolores ducimus totam odit impedit ea earum? Inventore, esse.
+    <div id="messages"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+
+      var form = document.getElementById("form");
+      var input = document.getElementById("input");
+      function displayData(array) {
+        document.getElementById("messages").innerHTML = null;
+        array.forEach((arr) => {
+          let el = document.createElement("div");
+          el.innerHTML = `
+            <p>Title : ${arr.title}</p>
+            <p>
+              ${arr.body}
+            </p>
+            <div>
+                <form onsubmit="handleSubmit(event,'${arr._id}')">
+        <input type="text" name="inputName" id="inputId" placeholder="Comment on this post">
+        <button type="submit">Submit</button>
+      </form>
+            </div>
+          `;
+          let ul = document.createElement("div");
+          ul.textContent = "Comments :";
+          arr.replies.forEach((element) => {
+            let li = document.createElement("div");
+            li.innerHTML = `${element.comment}<button onclick="replyToComment('${element._id}')">Reply</button>`;
+            ul.append(li);
+            if (element.replies.length == 1) {
+              let p = document.createElement("p");
+              p.innerText = "Reply :-" + element.replies[0];
+              li.append(p);
+            }
+          });
+
+          el.append(ul);
+          el.setAttribute("class", "blog");
+          document.getElementById("messages").append(el);
+        });
+      }
+      socket.on("msg", (msg) => {
+        console.log(msg);
+        displayData(msg);
+      });
+      function handleSubmit(event, id) {
+        event.preventDefault();
+        var inputValue = event.target.elements.inputName.value;
+        socket.emit("comment", { id: id, comment: inputValue });
+        event.target.elements.inputName.value = "";
+      }
+      function replyToComment(id) {
+        socket.emit("commentrep", {
+          id: id,
+          rep: prompt("Reply to this comment"),
+        });
+      }
+    </script>
+  </body>
+</html>
